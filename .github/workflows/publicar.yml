@@ -1,0 +1,97 @@
+# Publica el sitio de popusintes en GitHub Pages: la portada (index.html) y,
+# en placas/, las páginas de cada placa hechas con kicad-visor (esquemático,
+# capas, renders 3D y videos turntable).
+#
+# Una vez por repositorio: Settings > Pages > Build and deployment > Source:
+# "GitHub Actions".
+#
+# Las placas son submódulos en placas/. Antes de exportar, el workflow los
+# lleva al último commit de su rama principal, así que el sitio se actualiza
+# solo: al hacer push aquí, cada lunes, o a mano desde la pestaña Actions.
+
+name: publicar
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    # KiCad 10 con sus modelos 3D: kicad-cli no abre archivos de un KiCad
+    # más nuevo que el suyo.
+    container:
+      image: kicad/kicad:10.0-full
+      options: --user root
+    env:
+      # Qué exportar. Los videos (turntable) son lo más lento: la primera vez
+      # toman decenas de minutos por placa; después solo se vuelven a
+      # renderizar las placas que cambian.
+      ONLY: schematic,pcb,render,turntable
+    steps:
+      - name: Instalar kicad-visor
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ffmpeg librsvg2-bin python3-venv git xvfb xauth
+          python3 -m venv /opt/kicad-visor
+          /opt/kicad-visor/bin/pip install git+https://github.com/piruetasxyz/kicad-visor@v0.0.3
+
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+
+      - name: Actualizar placas al último commit
+        run: |
+          git config --global --add safe.directory '*'
+          git submodule update --remote
+          git submodule status
+
+      - name: Recuperar frames ya renderizados
+        uses: actions/cache/restore@v6
+        with:
+          path: ~/.cache/kicad-visor
+          key: kicad-visor-${{ hashFiles('placas/**/*.kicad_pcb', 'kicad-visor-config.py', '.github/workflows/*.yml') }}
+          restore-keys: kicad-visor-
+
+      # Una pantalla invisible, por si el render 3D de kicad-cli la pide.
+      - name: Exportar placas
+        run: xvfb-run -a /opt/kicad-visor/bin/kicad-visor export . --output _site/placas --only "$ONLY"
+
+      # Se guarda aunque la exportación falle o se acabe el tiempo, para que
+      # la siguiente ejecución siga desde los frames ya hechos.
+      - name: Guardar frames renderizados
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: ~/.cache/kicad-visor
+          key: kicad-visor-${{ hashFiles('placas/**/*.kicad_pcb', 'kicad-visor-config.py', '.github/workflows/*.yml') }}-${{ github.run_id }}
+
+      - name: Agregar portada
+        run: cp index.html _site/
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

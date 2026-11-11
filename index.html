@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>popusintes</title>
+<meta name="description" content="popusintes: línea de sintetizadores eurorack de código abierto de piruetas. Módulos, placas y herramientas.">
+<style>
+:root {
+  --bg: #ffffff; --fg: #1d1d1b; --muted: #6b6b66; --card: #f3f2ee;
+  --line: #e2e0da; --accent: #ff9ecf;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161615; --fg: #ecebe6; --muted: #9a9993; --card: #222220;
+    --line: #333331;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 1200px; margin: 0 auto; padding: 48px 16px 64px; }
+header h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); line-height: 1; margin: 0 0 16px; letter-spacing: -.02em; }
+header p { max-width: 640px; margin: 0; color: var(--muted); font-size: 1.125rem; }
+header nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 24px; }
+h2 {
+  font-size: 1.1rem; text-transform: lowercase; letter-spacing: .04em;
+  color: var(--muted); border-top: 1px solid var(--line);
+  padding-top: 16px; margin: 56px 0 16px;
+}
+h2 + p { margin: -8px 0 20px; color: var(--muted); max-width: 640px; }
+a { color: var(--fg); }
+.grid {
+  display: grid; gap: 16px; align-items: stretch;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+}
+article {
+  display: flex; flex-direction: column; min-width: 0;
+  background: var(--card); border-radius: 8px; overflow: hidden;
+}
+.foto {
+  display: flex; align-items: center; justify-content: center;
+  aspect-ratio: 4 / 3; background: #ffffff; text-decoration: none;
+}
+.foto img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.foto.vacia::after { content: "sin render todavía"; color: #9a9993; font-size: .875rem; }
+.texto { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+article h3 { margin: 0; font-size: 1.125rem; }
+article p { margin: 0; font-size: .9375rem; flex: 1; }
+.estado {
+  display: inline-block; font-size: .75rem; padding: 1px 8px; border-radius: 99px;
+  background: var(--bg); color: var(--muted); margin-left: 6px; vertical-align: 2px; font-weight: 400;
+}
+.enlaces { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .875rem; margin-top: 6px; }
+.todas { margin-top: 20px; }
+footer { margin-top: 72px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .875rem; }
+footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>popusintes</h1>
+  <p>Línea de sintetizadores eurorack de <a href="https://piruetas.xyz">piruetas</a>, publicada como hardware de código abierto: placas en KiCad, paneles y cajas en OpenSCAD, y las herramientas que hicimos para documentarlas.</p>
+  <nav>
+    <a href="#modulos">módulos</a>
+    <a href="#alimentacion">alimentación</a>
+    <a href="#herramientas">herramientas</a>
+    <a href="placas/">todas las placas</a>
+  </nav>
+</header>
+
+<!--
+  Cada placa enlaza a su página en placas/<proyecto>/, que genera kicad-visor
+  con el nombre del .kicad_pro. Al publicar una revisión nueva, actualizar
+  aquí el nombre (por ejemplo atenu-v-0-rev-b → atenu-v-0-rev-c) y agregar la
+  revisión anterior a "exclude" en kicad-visor-config.py.
+-->
+
+<h2 id="modulos">módulos</h2>
+<div class="grid">
+
+  <article>
+    <a class="foto" href="placas/atenu-v-0-rev-b/"><img src="placas/atenu-v-0-rev-b/3d/iso-frente.png" alt="Render 3D de la placa de atenu" loading="lazy" onerror="this.parentElement.classList.add('vacia');this.remove()"></a>
+    <div class="texto">
+      <h3>atenu</h3>
+      <p>Atenuador pasivo doble: dos canales, cada uno con entrada, potenciómetro y salida. No necesita alimentación. 5 HP.</p>
+      <div class="enlaces">
+        <a href="https://piruetas.xyz/atenu/">documentación</a>
+        <a href="placas/atenu-v-0-rev-b/">placa</a>
+        <a href="https://github.com/piruetasxyz/atenu">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <a class="foto" href="placas/suma-v-0-rev-b/"><img src="placas/suma-v-0-rev-b/3d/iso-frente.png" alt="Render 3D de la placa de suma" loading="lazy" onerror="this.parentElement.classList.add('vacia');this.remove()"></a>
+    <div class="texto">
+      <h3>suma</h3>
+      <p>Mezclador: suma tres entradas, cada una con su potenciómetro, en una salida, con un amplificador operacional TL072.</p>
+      <div class="enlaces">
+        <a href="https://piruetas.xyz/suma/">documentación</a>
+        <a href="placas/suma-v-0-rev-b/">placa</a>
+        <a href="https://github.com/piruetasxyz/suma">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <a class="foto" href="placas/ataconso-v-0-rev-c/"><img src="placas/ataconso-v-0-rev-c/3d/iso-frente.png" alt="Render 3D de la placa de ataconso" loading="lazy" onerror="this.parentElement.classList.add('vacia');this.remove()"></a>
+    <div class="texto">
+      <h3>ataconso <span class="estado">en desarrollo</span></h3>
+      <p>Revisión rev-c en desarrollo; la rev-b se fabricó en 2026 y funcionó.</p>
+      <div class="enlaces">
+        <a href="https://github.com/piruetasxyz/popusintes-esquematicos-placas/blob/main/docs/ataconso.md">documentación</a>
+        <a href="placas/ataconso-v-0-rev-c/">placa</a>
+        <a href="https://github.com/piruetasxyz/popusintes-esquematicos-placas/tree/main/ataconso">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <a class="foto" href="placas/parla-v-0-rev-c/"><img src="placas/parla-v-0-rev-c/3d/iso-frente.png" alt="Render 3D de la placa de parla" loading="lazy" onerror="this.parentElement.classList.add('vacia');this.remove()"></a>
+    <div class="texto">
+      <h3>parla</h3>
+      <p>Revisión v-0-rev-c, en popusintes-esquematicos-placas.</p>
+      <div class="enlaces">
+        <a href="https://piruetas.xyz/parla/">documentación</a>
+        <a href="placas/parla-v-0-rev-c/">placa</a>
+        <a href="https://github.com/piruetasxyz/popusintes-esquematicos-placas/tree/main/parla">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <a class="foto" href="placas/relo-v-0-rev-a/"><img src="placas/relo-v-0-rev-a/3d/iso-frente.png" alt="Render 3D de la placa de relo" loading="lazy" onerror="this.parentElement.classList.add('vacia');this.remove()"></a>
+    <div class="texto">
+      <h3>relo <span class="estado">en desarrollo</span></h3>
+      <p>Módulo de señal de reloj.</p>
+      <div class="enlaces">
+        <a href="https://github.com/piruetasxyz/popusintes-esquematicos-placas/blob/main/docs/relo.md">documentación</a>
+        <a href="placas/relo-v-0-rev-a/">placa</a>
+        <a href="https://github.com/piruetasxyz/popusintes-esquematicos-placas/tree/main/relo">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <a class="foto" href="placas/diente-v-0-rev-a/"><img src="placas/diente-v-0-rev-a/3d/iso-frente.png" alt="Render 3D de la placa de diente" loading="lazy" onerror="this.parentElement.classList.add('vacia');this.remove()"></a>
+    <div class="texto">
+      <h3>diente <span class="estado">en desarrollo</span></h3>
+      <p>Revisión v-0-rev-a, en progreso.</p>
+      <div class="enlaces">
+        <a href="https://github.com/piruetasxyz/popusintes-esquematicos-placas/blob/main/docs/diente.md">documentación</a>
+        <a href="placas/diente-v-0-rev-a/">placa</a>
+        <a href="https://github.com/piruetasxyz/popusintes-esquematicos-placas/tree/main/diente">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <a class="foto" href="placas/plexo-v-0-rev-a/"><img src="placas/plexo-v-0-rev-a/3d/iso-frente.png" alt="Render 3D de la placa de plexo" loading="lazy" onerror="this.parentElement.classList.add('vacia');this.remove()"></a>
+    <div class="texto">
+      <h3>plexo</h3>
+      <p>Multiplexor de 6 potenciómetros para Raspberry Pi Pico, con un 74HC4051: seis perillas en una sola entrada analógica.</p>
+      <div class="enlaces">
+        <a href="placas/plexo-v-0-rev-a/">placa</a>
+        <a href="https://github.com/piruetasxyz/plexo">código</a>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<h2 id="alimentacion">alimentación y caja</h2>
+<div class="grid">
+
+  <article>
+    <a class="foto" href="placas/chufe-v-0-rev-a/"><img src="placas/chufe-v-0-rev-a/3d/iso-frente.png" alt="Render 3D de la placa de chufe" loading="lazy" onerror="this.parentElement.classList.add('vacia');this.remove()"></a>
+    <div class="texto">
+      <h3>chufe</h3>
+      <p>Fuente de alimentación: entrada de 12 V DC, salidas ±12V y +5V, con un LED por cada riel.</p>
+      <div class="enlaces">
+        <a href="https://piruetas.xyz/chufe/">documentación</a>
+        <a href="placas/chufe-v-0-rev-a/">placa</a>
+        <a href="https://github.com/piruetasxyz/chufe">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <a class="foto" href="placas/chufebu-v-0-rev-a/"><img src="placas/chufebu-v-0-rev-a/3d/iso-frente.png" alt="Render 3D de la placa de chufebu" loading="lazy" onerror="this.parentElement.classList.add('vacia');this.remove()"></a>
+    <div class="texto">
+      <h3>chufebu</h3>
+      <p>Bus de alimentación: cinco headers de 16 pines, cada uno con su conector Molex KK-396 para pruebas.</p>
+      <div class="enlaces">
+        <a href="https://piruetas.xyz/chufebu/">documentación</a>
+        <a href="placas/chufebu-v-0-rev-a/">placa</a>
+        <a href="https://github.com/piruetasxyz/chufebu">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <div class="texto">
+      <h3>bote</h3>
+      <p>Caja eurorack imprimible en 3D, de 48 HP, hecha en OpenSCAD.</p>
+      <div class="enlaces">
+        <a href="https://github.com/piruetasxyz/bote">código</a>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<p class="todas"><a href="placas/">Ver todas las placas →</a> esquemáticos, capas, renders 3D y videos, generados con kicad-visor.</p>
+
+<h2 id="herramientas">herramientas</h2>
+<p>Lo que hicimos para diseñar y documentar popusintes. Sirven para cualquier proyecto.</p>
+<div class="grid">
+
+  <article>
+    <div class="texto">
+      <h3>kicad-visor</h3>
+      <p>Documentación a partir de proyectos KiCad: esquemáticos, capas de la placa, renders 3D y videos turntable que se repiten sin cortes. Genera las páginas de placas de este sitio.</p>
+      <div class="enlaces">
+        <a href="https://piruetas.xyz/kicad-visor-demo/">demo</a>
+        <a href="https://github.com/piruetasxyz/kicad-visor">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <div class="texto">
+      <h3>kicad-retrata</h3>
+      <p>Acción de GitHub que captura el esquemático y la placa de cada módulo y regenera su tabla de Bill of materials en Markdown.</p>
+      <div class="enlaces">
+        <a href="https://github.com/piruetasxyz/kicad-retrata">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <div class="texto">
+      <h3>popusintes-cajas-paneles</h3>
+      <p>Cajas y paneles paramétricos en OpenSCAD, compartidos por los módulos y por bote.</p>
+      <div class="enlaces">
+        <a href="https://github.com/piruetasxyz/popusintes-cajas-paneles">código</a>
+      </div>
+    </div>
+  </article>
+
+  <article>
+    <div class="texto">
+      <h3>popusintes-rack</h3>
+      <p>Versiones virtuales de popusintes para VCV Rack.</p>
+      <div class="enlaces">
+        <a href="https://github.com/piruetasxyz/popusintes-rack">código</a>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<footer>
+  <a href="https://piruetas.xyz">piruetas</a> ·
+  <a href="https://github.com/piruetasxyz">github</a> ·
+  <a href="https://instagram.com/piruetas.xyz">instagram</a> ·
+  <a href="https://github.com/piruetasxyz/popusintes">código de este sitio</a>
+</footer>
+
+</main>
+</body>
+</html>

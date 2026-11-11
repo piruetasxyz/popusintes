@@ -1,0 +1,21 @@
+[submodule "placas/atenu"]
+	path = placas/atenu
+	url = https://github.com/piruetasxyz/atenu.git
+[submodule "placas/chufe"]
+	path = placas/chufe
+	url = https://github.com/piruetasxyz/chufe.git
+[submodule "placas/chufebu"]
+	path = placas/chufebu
+	url = https://github.com/piruetasxyz/chufebu.git
+[submodule "placas/suma"]
+	path = placas/suma
+	url = https://github.com/piruetasxyz/suma.git
+[submodule "placas/cuadra"]
+	path = placas/cuadra
+	url = https://github.com/piruetasxyz/cuadra.git
+[submodule "placas/plexo"]
+	path = placas/plexo
+	url = https://github.com/piruetasxyz/plexo.git
+[submodule "placas/popusintes-esquematicos-placas"]
+	path = placas/popusintes-esquematicos-placas
+	url = https://github.com/piruetasxyz/popusintes-esquematicos-placas.git
