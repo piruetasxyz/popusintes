@@ -5,17 +5,18 @@
 # que no van en el sitio. Los patrones son relativos a la raíz, con "./"
 # al principio, y "*" también calza con "/".
 
-# Videos turntable, más cortos y menos que los de kicad-visor por defecto
-# (2 giros × 3 formatos × 4 fondos, de 6 s: 24 videos por placa). Acá: un
-# giro, un formato y dos fondos, de 4 s: 2 videos por placa.
+# Videos turntable: el estilo estándar de popusintes, el mismo que usa cada
+# placa en .github/workflows/girar-placa.yml (mantener ambos iguales). Gira
+# como un disco, vista desde arriba en ángulo, cuadrado de 1080x1080, fondo
+# rosado, 6 s: 1 video por placa (kicad-visor por defecto hace 24).
 #
 # El tiempo de render depende de giros × formatos × segundos; los fondos
 # casi no cuestan (solo se vuelve a codificar el video), así que agregar
 # colores es barato y agregar giros o formatos es caro.
-turntables = [("z", "ccw")]  # gira como un disco, vista desde arriba en ángulo
+turntables = [("z", "ccw")]
 aspects = {"square": (1080, 1080)}
-backgrounds = {"white": "#ffffff", "pink": "#ff9ecf"}
-turntable_seconds = 4
+backgrounds = {"pink": "#ff9ecf"}
+turntable_seconds = 6
 
 exclude = [
     # Los de siempre de kicad-visor.

@@ -1,0 +1,153 @@
+name: Girar placa
+
+# Video estándar de las placas de popusintes: el render 3D de la placa
+# girando como un disco, vista desde arriba en ángulo, cuadrado de
+# 1080x1080, fondo rosado, 6 segundos que se repiten sin cortes. Lo hace
+# kicad-visor (https://github.com/piruetasxyz/kicad-visor).
+#
+# Referencia del estilo:
+# https://cdn.jsdelivr.net/gh/piruetasxyz/piruetas-web-media@main/2026-piruetas-chufe/mp4/chufe-placa-3d-giro.mp4
+#
+# Este es un workflow reutilizable: cada placa lo llama desde su propio
+# publicar.yml, así que el estilo se cambia una sola vez, aquí, y vale para
+# todas. En la placa:
+#
+#   jobs:
+#     girar:
+#       if: github.repository == 'piruetasxyz/<placa>'
+#       uses: piruetasxyz/popusintes/.github/workflows/girar-placa.yml@main
+#       secrets: inherit
+#
+# Requisitos en el repositorio de la placa:
+#   - kicad-retrata.yml con "proyecto:" apuntando a la revisión actual; esa
+#     es la placa que se renderiza.
+#   - el secreto FUENTE_TALAGANTE (la fuente en base64), porque Talagante
+#     aparece en el serigrafiado.
+#   - permiso "contents: write", para hacer commit del video.
+#
+# El video queda en docs/videos/<placa>-placa-3d-giro.mp4, donde <placa> es
+# el nombre del repositorio, y se muestra en docs/index.md con:
+#
+#   <video src="./videos/<placa>-placa-3d-giro.mp4" autoplay loop muted playsinline width="540">Render 3D de la placa de <placa>.</video>
+#
+# Solo se renderiza cuando cambian la placa o el estilo de abajo: la huella
+# de ambos queda guardada junto al video, en <placa>-placa-3d-giro.huella.
+# Al cambiar el estilo, todas las placas se vuelven a renderizar en su
+# siguiente push.
+
+on:
+  workflow_call: {}
+
+jobs:
+  girar:
+    runs-on: ubuntu-latest
+    # La primera vez renderiza por varias decenas de minutos.
+    timeout-minutes: 120
+    # Usar la misma versión mayor de KiCad con la que se guardó la placa.
+    container:
+      image: kicad/kicad:10.0-full
+      options: --user root
+    env:
+      VIDEO: docs/videos/${{ github.event.repository.name }}-placa-3d-giro.mp4
+      HUELLA: docs/videos/${{ github.event.repository.name }}-placa-3d-giro.huella
+      # El estilo estándar. Mantener igual a kicad-visor-config.py de este
+      # repositorio, para que el sitio de popusintes muestre lo mismo.
+      EJE: z
+      TAMANO: 1080x1080
+      FONDO: "#ff9ecf"
+      SEGUNDOS: "6"
+      KICAD_VISOR: v0.0.3
+    steps:
+      # git tiene que estar instalado antes de clonar, para que checkout
+      # deje un repositorio donde se pueda hacer commit.
+      - name: Instalar kicad-visor
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ffmpeg librsvg2-bin python3-venv git xvfb xauth fontconfig
+          python3 -m venv /opt/kicad-visor
+          /opt/kicad-visor/bin/pip install "git+https://github.com/piruetasxyz/kicad-visor@$KICAD_VISOR"
+
+      # Clona el repositorio de la placa que llamó a este workflow.
+      - name: Clonar repositorio
+        uses: actions/checkout@v7
+
+      - name: Revisar si hay que renderizar
+        id: revisar
+        run: |
+          set -eu
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          PROYECTO=$(sed -n 's/^ *proyecto: *//p' kicad-retrata.yml | head -n 1)
+          PLACA="$PROYECTO.kicad_pcb"
+          if [ ! -f "$PLACA" ]; then
+            echo "::error::No existe la placa $PLACA (leída de kicad-retrata.yml)."
+            exit 1
+          fi
+          HUELLA_NUEVA=$( { sha256sum "$PLACA"; echo "$EJE $TAMANO $FONDO $SEGUNDOS kicad-visor@$KICAD_VISOR"; } | sha256sum | cut -d ' ' -f 1)
+          echo "placa=$PLACA" >> "$GITHUB_OUTPUT"
+          echo "huella=$HUELLA_NUEVA" >> "$GITHUB_OUTPUT"
+          if [ -f "$VIDEO" ] && [ -f "$HUELLA" ] && [ "$(cat "$HUELLA")" = "$HUELLA_NUEVA" ]; then
+            echo "El video ya corresponde a $PLACA, no se renderiza."
+            echo "renderizar=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Hay que renderizar $PLACA."
+            echo "renderizar=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Talagante aparece en el serigrafiado, así que el render 3D también la
+      # necesita. Se instala en el sistema del contenedor, fuera del
+      # repositorio.
+      - name: Instalar fuentes privadas
+        if: steps.revisar.outputs.renderizar == 'true'
+        env:
+          FUENTE_TALAGANTE: ${{ secrets.FUENTE_TALAGANTE }}
+        run: |
+          set -eu
+          if [ -z "$FUENTE_TALAGANTE" ]; then
+            echo "::error::Falta el secreto FUENTE_TALAGANTE (¿falta \"secrets: inherit\" al llamar a este workflow?)."
+            exit 1
+          fi
+          mkdir -p /usr/local/share/fonts/piruetas
+          printf '%s' "$FUENTE_TALAGANTE" | base64 --decode > /usr/local/share/fonts/piruetas/Talagante.otf
+          fc-cache -f
+          # Sin Talagante, KiCad la reemplaza sin avisar: mejor fallar acá.
+          if ! fc-list | grep -qi talagante; then
+            echo "::error::Talagante no quedó instalada: revisar el secreto FUENTE_TALAGANTE."
+            exit 1
+          fi
+          fc-list | grep -i talagante
+
+      - name: Recuperar cuadros renderizados
+        if: steps.revisar.outputs.renderizar == 'true'
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/kicad-visor
+          key: kicad-visor-${{ steps.revisar.outputs.huella }}
+          restore-keys: kicad-visor-
+
+      # Una pantalla invisible, por si el render 3D de kicad-cli necesita una.
+      - name: Renderizar video
+        if: steps.revisar.outputs.renderizar == 'true'
+        env:
+          PLACA: ${{ steps.revisar.outputs.placa }}
+          HUELLA_NUEVA: ${{ steps.revisar.outputs.huella }}
+        run: |
+          set -eu
+          mkdir -p "$(dirname "$VIDEO")"
+          xvfb-run -a /opt/kicad-visor/bin/kicad-visor turntable "$PLACA" \
+            -o "$VIDEO" --axis "$EJE" --size "$TAMANO" \
+            --background "$FONDO" --seconds "$SEGUNDOS"
+          printf '%s\n' "$HUELLA_NUEVA" > "$HUELLA"
+
+      - name: Commit y push
+        if: steps.revisar.outputs.renderizar == 'true'
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$VIDEO" "$HUELLA"
+          if git diff --cached --quiet; then
+            echo "El video no cambió."
+            exit 0
+          fi
+          git commit --quiet --message "Actualizar video del render 3D de la placa [skip ci]"
+          git push
